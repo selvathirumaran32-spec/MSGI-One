@@ -25,8 +25,8 @@ function threadHTML(c) {
   const head = isWide() ? `<div class="chead">${av(c, 1)}<div><div class="name"><a href="#profile" data-prof="${c.id}" style="color:inherit;text-decoration:none">${esc(c.n)}</a></div><div class="sub">${esc(hl(c))}</div></div></div>` : "";
   const body = (x) => (x.rec ? recCard(x.rec) : x.file ? fileMsg(x.file) : esc(x.t));
   return `<div class="thread">${head}<div class="msgs" id="msgs">${m.length ? m.map((x, i) => `<div class="m ${x.f === st.me.id ? "mine" : "th"}${x.rec ? " rec" : ""}">${body(x)}<small>${clock(x.at)}</small></div>${i === lastMine ? `<div class="tick">${i < readN ? "✓✓ Read" : "✓ Sent"}</div>` : ""}`).join("") : `<p class="sub" style="text-align:center">Say hello to ${esc(c.n.split(" ")[0])}.</p>`}</div>
-    <form id="mf" class="mform"><div class="plusw"><button type="button" class="plus" data-plus aria-label="Attach a file, photo or video">${ic("plus", 22)}</button><div class="attmenu" hidden>
-      <label>${ic("file", 18)} Document<input type="file" data-afile hidden></label><label>${ic("image", 18)} Photo<input type="file" accept="image/*" data-afile hidden></label><label>${ic("video", 18)} Video<input type="file" accept="video/*" data-afile hidden></label></div></div>
+    <form id="mf" class="mform"><div class="plusw"><button type="button" class="plus" data-plus aria-label="Attach a file or photo">${ic("plus", 22)}</button><div class="attmenu" hidden>
+      <label>${ic("file", 18)} Document<input type="file" data-afile hidden></label><label>${ic("image", 18)} Photo<input type="file" accept="image/*" data-afile hidden></label></div></div>
       <input name="mt" placeholder="Type a message..." autocomplete="off" required aria-label="Message"><button class="send" aria-label="Send">${ic("send", 20)}</button></form></div>`;
 }
 
@@ -57,11 +57,12 @@ document.addEventListener("click", (e) => {
   if (!e.target.closest(".attmenu")) menu.hidden = true;
 });
 
-// Send a file, photo or video (up to 1 GB). It is saved in the browser's IndexedDB and shown as a message.
+// Send a file or photo (up to 1 GB). Videos are not allowed. It is saved in the browser's IndexedDB and shown as a message.
 document.addEventListener("change", async (e) => {
   const inp = e.target.closest ? e.target.closest("[data-afile]") : null;
   if (!inp || !inp.files[0] || !st.me) return;
   const f = inp.files[0];
+  if (f.type.startsWith("video/")) { inp.value = ""; return toast("Video uploads are not supported"); }
   if (f.size > MAX_SHARE) return toast("Files can be up to 1 GB");
   toast(`Sending ${f.name} (${fmtSize(f.size)})…`);
   try {

@@ -1,6 +1,6 @@
 # MSGI Alumni One
 
-Alumni network for the Meenakshi Sundararajan Group of Institutions. Alumni and 2nd to 4th year students sign in with their college register number and see a posts feed with photos and videos, reels, announcements and notifications, a directory of members who have joined, a world map, jobs, events, one-to-one messages, profiles and recommendations.
+Alumni network for the Meenakshi Sundararajan Group of Institutions. Alumni and 2nd to 4th year students sign in with their college register number and see a posts feed with photos, announcements and notifications, a directory of members who have joined, a world map, jobs, events, one-to-one messages, profiles and recommendations.
 
 The college dataset (`Final_Formatted_Alumni_Dataset_2008_2029.xlsx`) is the list of people who are allowed to sign in. This is a front-end prototype: connections, messages, jobs, events, profile edits and photos are saved in the browser's localStorage and shared between accounts signed in on the same device (and between tabs). They are not shared between different devices until a backend is added.
 
@@ -57,7 +57,7 @@ Nobody can change their own role. Every administrator action goes in the audit l
     js/views/             one file per screen
       auth.js               splash, login, sign out
       home.js               quick access buttons and the posts feed
-      feed.js               posts, likes, comments and reels
+      feed.js               posts, likes and comments
       notices.js            announcements page and notifications page
       recommend.js          "Recommend me" request form
       network.js            directory with search and filters
@@ -77,11 +77,10 @@ Scripts are plain files loaded in order from `index.html`; keep that order if yo
 
 `js/world-map.js` is a simplified world outline drawn by hand, because map data could not be downloaded when it was built. It is fine for showing pins, but coastlines are rough. For a zoomable street-level map, replace `js/views/map.js` with Leaflet and OpenStreetMap tiles (needs an internet connection).
 
-## Posts, reels, announcements and notifications
+## Posts, announcements and notifications
 
-- Home opens with the Quick Access buttons (Messages, Connections, Jobs, Announcements, Reels, Events, Alumni Map, Directory, Notifications) and then the feed of everyone's posts.
-- A post can have text, one photo and/or one video (up to 30 MB). Photos are shrunk to 1000 px. Photos and videos are stored in the browser's IndexedDB, so like everything else they are only shared between accounts on the same device until a backend is added.
-- Reels shows every video post in a full-height scrolling view. The visible reel plays automatically (muted).
+- Home opens with the Quick Access buttons (Messages, Connections, Jobs, Announcements, Events, Alumni Map, Directory, Notifications) and then the feed of everyone's posts.
+- A post can have text and one photo. Photos are shrunk to 1000 px. Photos are stored in the browser's IndexedDB, so like everything else they are only shared between accounts on the same device until a backend is added.
 - Announcements lists everything the Super Admin published (or approved), and the bell and the Announcements button show a count of new ones. Faculty can propose an announcement there. Notifications lists connection invitations, unread messages, new events and announcements.
 
 ## Jobs, "Recommend me" and file sharing
@@ -89,7 +88,7 @@ Scripts are plain files loaded in order from `index.html`; keep that order if yo
 - Alumni post a vacancy (title, company, location, vacancies, details). Everyone else sees a **Recommend me** button on it.
 - Pressing it opens a form prefilled from the person's profile: current location, role, company, experience, skills, qualification, email, phone, link, a note, and a resume (the saved one or a new upload). When sent, the two people are **connected automatically** (the one place where no invitation is needed), a chat opens, and the job poster receives a "Recommendation request" card with all those details and the resume to download. The poster then asks for more details in the chat.
 - My Profile has the full details form and a saved resume (up to 100 MB), so the next request is one tap.
-- In any chat, the **+** button sends a document, photo or video (up to 1 GB each). Files are kept in the browser's IndexedDB, so like the rest of the data they only reach people on the same device until a backend with file storage is added. Very large files also depend on how much space the browser allows.
+- In any chat, the **+** button sends a document or photo (up to 1 GB each); video files are not accepted. Files are kept in the browser's IndexedDB, so like the rest of the data they only reach people on the same device until a backend with file storage is added. Very large files also depend on how much space the browser allows.
 
 ## Before a real launch
 
