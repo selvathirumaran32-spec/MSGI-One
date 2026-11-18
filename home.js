@@ -2,7 +2,7 @@
 function tiles() {
   const tile = (t, label, i, n) => `<button class="tile" data-t="${t}">${n ? `<span class="dot">${n}</span>` : ""}<span class="ti">${ic(i, 26)}</span><span>${label}</span></button>`;
   return tile("messages", "Messages", "chat", unreadTotal()) + tile("network", "Connections", "users", invites().length) + tile("jobs", "Jobs", "briefcase")
-    + tile("announcements", "Announcements", "volume", newAnn()) + tile("reels", "Reels", "play") + tile("events", "Events", "calendar", shared.events.length)
+    + tile("announcements", "Announcements", "volume", newAnn()) + tile("events", "Events", "calendar", shared.events.length)
     + tile("map", "Alumni Map", "pin") + tile("network", "Directory", "search") + tile("notifications", "Notifications", "bell", invites().length + unreadTotal());
 }
 

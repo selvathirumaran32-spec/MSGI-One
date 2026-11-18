@@ -1,9 +1,9 @@
-// Posts feed (photos and videos), reels, and the post, like and comment actions.
-function composer(videoOnly) {
+// Posts feed (photos), and the post, like and comment actions.
+function composer() {
   const d = st.draft;
-  return `<div class="card pad composer"><div class="ph" style="align-items:flex-start">${av(st.me)}<textarea id="np" rows="2" placeholder="${videoOnly ? "Add a caption for your reel" : `What’s on your mind, ${esc(st.me.n.split(" ")[0])}?`}" aria-label="New post">${esc(st.draftText || "")}</textarea></div>
+  return `<div class="card pad composer"><div class="ph" style="align-items:flex-start">${av(st.me)}<textarea id="np" rows="2" placeholder="What’s on your mind, ${esc(st.me.n.split(" ")[0])}?" aria-label="New post">${esc(st.draftText || "")}</textarea></div>
     ${d.name ? `<div class="sub" style="margin-top:8px">Attached: ${esc(d.name)} <button type="button" class="linkbtn" data-dclear>Remove</button></div>` : ""}
-    <div class="crow">${videoOnly ? "" : `<label class="chipb">${ic("image", 18)} Photo<input type="file" accept="image/*" data-pfile="img" hidden></label>`}<label class="chipb">${ic("video", 18)} Video<input type="file" accept="video/*" data-pfile="vid" hidden></label><button class="btn gold sm" data-post style="margin-left:auto">${videoOnly ? "Share reel" : "Post"}</button></div></div>`;
+    <div class="crow"><label class="chipb">${ic("image", 18)} Photo<input type="file" accept="image/*" data-pfile="img" hidden></label><button class="btn gold sm" data-post style="margin-left:auto">Post</button></div></div>`;
 }
 
 const authorOf = (p) => byId(p.a);
@@ -21,47 +21,20 @@ function postHTML(p) {
     <div class="acts"><button data-plike="${p.id}" class="${liked ? "on" : ""}" aria-pressed="${liked}">${ic("heart", 18)} ${liked ? "Liked" : "Like"}</button><button data-pcm="${p.id}">${ic("chat", 18)} Comment</button></div>${st.open[p.id] ? commentsHTML(p) : ""}</article>`;
 }
 
-function reelHTML(p) {
-  const a = authorOf(p), liked = p.likes.includes(st.me.id);
-  return `<section class="reel" data-pid="${p.id}"><video data-mid="${p.vid}" muted loop playsinline controls preload="metadata"></video>
-    <div class="rover"><div class="rmeta">${av(a)}<b>${esc(a.n)}</b></div>${p.t ? `<p>${esc(p.t)}</p>` : ""}</div>
-    <div class="rside"><button data-plike="${p.id}" class="${liked ? "on" : ""}" aria-label="Like">${ic("heart", 24)}<span>${p.likes.length}</span></button><button data-pcm="${p.id}" aria-label="Comments">${ic("chat", 24)}<span>${p.cm.length}</span></button></div>${st.open[p.id] ? commentsHTML(p) : ""}</section>`;
-}
-
 function feedHTML() {
   const list = visiblePosts(), shown = list.slice(0, st.plimit);
   return shown.map(postHTML).join("") || `<div class="card pad"><p class="sub">No posts yet. Share the first update with the MSGI family.</p></div>`
     + (list.length > shown.length ? `<div style="text-align:center"><button class="btn out" data-pmore>Show more posts</button></div>` : "");
 }
 
-let reelObserver;
-function observeReels() {
-  if (reelObserver) reelObserver.disconnect();
-  const root = $("#reels");
-  if (!root) return;
-  reelObserver = new IntersectionObserver((es) => es.forEach((en) => {
-    const v = en.target.querySelector("video");
-    if (!v) return;
-    if (en.intersectionRatio >= 0.7) v.play().catch(() => {}); else v.pause();
-  }), { root, threshold: [0, 0.7] });
-  root.querySelectorAll(".reel").forEach((r) => reelObserver.observe(r));
-}
-
-function reelsV() {
-  const vids = visiblePosts().filter((p) => p.vid);
-  $("#main").innerHTML = `${composer(true)}<div class="reels" id="reels">${vids.map(reelHTML).join("") || `<div class="card pad"><p class="sub">No reels yet. Share a short video to start.</p></div>`}</div>`;
-  observeReels();
-}
-
-// Redraw one post (or reel) after a like or comment, without redrawing the whole page.
+// Redraw one post after a like or comment, without redrawing the whole page.
 function rerenderPost(id) {
   const p = shared.posts.find((x) => x.id === id);
   document.querySelectorAll(`[data-pid="${id}"]`).forEach((el) => {
     if (!p) return el.remove();
-    el.outerHTML = el.classList.contains("reel") ? reelHTML(p) : postHTML(p);
+    el.outerHTML = postHTML(p);
   });
   hydrateMedia($("#main"));
-  observeReels();
 }
 
 document.addEventListener("click", async (e) => {
@@ -85,14 +58,12 @@ document.addEventListener("click", async (e) => {
   if (d.pmore !== undefined) { st.plimit += 20; return refresh(); }
   if (d.post !== undefined) {
     const text = $("#np").value.trim(), dr = st.draft;
-    if (!text && !dr.mid) return toast("Write something or add a photo or video");
-    if (st.tab === "reels" && dr.kind !== "vid") return toast("Choose a video for your reel");
+    if (!text && !dr.mid) return toast("Write something or add a photo");
     const p = { id: Date.now(), a: st.me.id, t: text, at: Date.now(), likes: [], cm: [] };
     if (dr.kind === "img") p.img = dr.mid;
-    if (dr.kind === "vid") p.vid = dr.mid;
     shared.posts.unshift(p);
     st.draft = {}; st.draftText = "";
-    save(); toast(st.tab === "reels" ? "Reel shared" : "Posted"); refresh();
+    save(); toast("Posted"); refresh();
   }
 });
 
@@ -104,15 +75,15 @@ document.addEventListener("keydown", (e) => {
   save(); rerenderPost(p.id);
 });
 
-// Choosing a photo or video: save it in IndexedDB and attach it to the draft.
+// Choosing a photo: save it in IndexedDB and attach it to the draft.
 document.addEventListener("change", async (e) => {
   const inp = e.target.closest ? e.target.closest("[data-pfile]") : null;
   if (!inp || !inp.files[0]) return;
   const f = inp.files[0], kind = inp.dataset.pfile;
-  if (kind === "vid" && f.size > 30e6) return toast("Please choose a video under 30 MB");
+  if (kind !== "img" || !f.type.startsWith("image/")) return toast("Please choose a photo");
   try {
     const id = "m" + Date.now() + Math.random().toString(36).slice(2, 6);
-    await putMedia(id, kind === "img" ? await resizeImage(f) : f);
+    await putMedia(id, await resizeImage(f));
     st.draftText = $("#np") ? $("#np").value : "";
     st.draft = { kind, mid: id, name: f.name };
     refresh();

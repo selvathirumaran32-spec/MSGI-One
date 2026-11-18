@@ -1,8 +1,8 @@
 // Router, header, bottom tabs and page-level events.
-const ROUTES = ["recommend", "reels", "announcements", "notifications", "home", "network", "jobs", "map", "messages", "profile", "console", "events", "myprofile"];
+const ROUTES = ["recommend", "announcements", "notifications", "home", "network", "jobs", "map", "messages", "profile", "console", "events", "myprofile"];
 const route = () => (ROUTES.includes(location.hash.slice(1)) ? location.hash.slice(1) : "home");
-const NAV = [["home", "Home", "home"], ["network", "Network", "users"], ["jobs", "Jobs", "briefcase"], ["events", "Events", "calendar"], ["messages", "Messages", "chat", "wide-only"], ["reels", "Reels", "play", "wide-only"], ["announcements", "Announcements", "volume", "wide-only"], ["map", "Alumni Map", "pin", "wide-only"], ["myprofile", "Profile", "user"]];
-const TITLES = { recommend: "Recommendation request", reels: "Reels", announcements: "Announcements", notifications: "Notifications", home: "Home", network: "Alumni Directory", jobs: "Job Opportunities", events: "Events & Meetups", map: "Alumni Map", messages: "Messages", profile: "Profile", myprofile: "My Profile" };
+const NAV = [["home", "Home", "home"], ["network", "Network", "users"], ["jobs", "Jobs", "briefcase"], ["events", "Events", "calendar"], ["messages", "Messages", "chat", "wide-only"], ["announcements", "Announcements", "volume", "wide-only"], ["map", "Alumni Map", "pin", "wide-only"], ["myprofile", "Profile", "user"]];
+const TITLES = { recommend: "Recommendation request", announcements: "Announcements", notifications: "Notifications", home: "Home", network: "Alumni Directory", jobs: "Job Opportunities", events: "Events & Meetups", map: "Alumni Map", messages: "Messages", profile: "Profile", myprofile: "My Profile" };
 $("#nav").innerHTML = `<div class="nbrand"><img class="lg" src="${LOGO}" alt="MSGI"><b>MSGI Alumni One</b></div>` + NAV.map(([t, l, i, c]) => `<button data-t="${t}" class="${c || ""}">${ic(i)}<span>${l}</span>${t === "network" ? '<span class="dot" id="nreq"></span>' : ""}${t === "messages" ? '<span class="dot" id="nmsg2"></span>' : ""}</button>`).join("") + `<button class="wide-only nso" data-so>${ic("lock")}<span>Sign out</span></button>`;
 
 // Top bar. Phone: logo or back arrow and title. Laptop: page title, search, notifications and my photo.
@@ -33,7 +33,7 @@ function show(t) {
   if (!signedIn) return st.splash && !isWide() ? splashV() : authV();
   header(t, staff);
   if (staff) return consoleV();
-  ({ home, network, jobs: jobsV, map: mapV, messages: messagesV, profile: profileV, events: eventsV, myprofile: myProfileV, reels: reelsV, recommend: recommendV, announcements: announcementsV, notifications: notificationsV })[t === "console" ? "home" : t]();
+  ({ home, network, jobs: jobsV, map: mapV, messages: messagesV, profile: profileV, events: eventsV, myprofile: myProfileV, recommend: recommendV, announcements: announcementsV, notifications: notificationsV })[t === "console" ? "home" : t]();
   hydrateMedia($("#main"));
   updReq();
 }
